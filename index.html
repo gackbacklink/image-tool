@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Image Studio Pro</title>
+<title>Smart Image Studio</title>
 
 <style>
 
@@ -26,11 +26,12 @@ max-width:100%;
 background:white;
 border-radius:10px;
 margin-top:15px;
+cursor:crosshair;
 }
 
 button{
 padding:8px 12px;
-margin:5px;
+margin:4px;
 border:none;
 border-radius:8px;
 cursor:pointer;
@@ -51,7 +52,7 @@ background:#00c6ff;
 
 <div class="container">
 
-<h2>🚀 AI Image Studio Level 18</h2>
+<h2>🚀 Smart Image Studio Level 16</h2>
 
 <input type="file" id="upload">
 
@@ -61,27 +62,37 @@ background:#00c6ff;
 
 <br><br>
 
-<h3>🤖 AI Tools</h3>
+<h3>🎨 Tools</h3>
 
-<button onclick="aiUpscale()">AI Upscale</button>
-<button onclick="smoothSkin()">Smooth</button>
-<button onclick="vibrance()">Vibrance</button>
-<button onclick="autoEnhance()">Auto Enhance</button>
-
-<br><br>
-
-<h3>🎨 Effects</h3>
-
-<button onclick="portraitBlur()">Portrait Blur</button>
-<button onclick="cartoon()">Cartoon</button>
-<button onclick="sketch()">Sketch</button>
+<button onclick="smartEnhance()">🤖 Smart Enhance</button>
+<button onclick="addFrame()">🖼 Add Frame</button>
+<button onclick="addGradient()">🌈 Gradient</button>
 
 <br><br>
 
-<h3>💾 Project</h3>
+<h3>🖌 Draw</h3>
 
-<button onclick="saveProject()">Save</button>
-<button onclick="loadProject()">Load</button>
+<button onclick="setBrush()">Brush</button>
+<button onclick="setEraser()">Eraser</button>
+
+Size
+<input type="range" id="size" min="2" max="40" value="5">
+
+Color
+<input type="color" id="color">
+
+<br><br>
+
+<h3>🧩 Text</h3>
+
+<input id="textInput" placeholder="Text">
+
+<button onclick="addText()">Add</button>
+
+<br><br>
+
+<button onclick="saveProject()">💾 Save</button>
+<button onclick="loadProject()">📂 Load</button>
 
 <br><br>
 
@@ -121,41 +132,16 @@ reader.readAsDataURL(file);
 
 });
 
-function aiUpscale(){
-
-const temp=document.createElement("canvas");
-const tctx=temp.getContext("2d");
-
-temp.width=canvas.width*2;
-temp.height=canvas.height*2;
-
-tctx.drawImage(canvas,0,0,temp.width,temp.height);
-
-canvas.width=temp.width;
-canvas.height=temp.height;
-
-ctx.drawImage(temp,0,0);
-
-}
-
-function smoothSkin(){
-
-ctx.filter="blur(1px)";
-ctx.drawImage(canvas,0,0);
-ctx.filter="none";
-
-}
-
-function vibrance(){
+function smartEnhance(){
 
 const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
+const data=imageData.data;
 
-for(let i=0;i<d.length;i+=4){
+for(let i=0;i<data.length;i+=4){
 
-d[i]*=1.15;
-d[i+1]*=1.15;
-d[i+2]*=1.15;
+data[i]*=1.1;
+data[i+1]*=1.1;
+data[i+2]*=1.1;
 
 }
 
@@ -163,70 +149,76 @@ ctx.putImageData(imageData,0,0);
 
 }
 
-function autoEnhance(){
+function addFrame(){
 
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
+ctx.lineWidth=20;
+ctx.strokeStyle="white";
 
-for(let i=0;i<d.length;i+=4){
-
-d[i]=Math.min(255,d[i]*1.2);
-d[i+1]=Math.min(255,d[i+1]*1.1);
-d[i+2]=Math.min(255,d[i+2]*1.1);
+ctx.strokeRect(0,0,canvas.width,canvas.height);
 
 }
 
-ctx.putImageData(imageData,0,0);
+function addGradient(){
+
+const grad=ctx.createLinearGradient(0,0,0,canvas.height);
+
+grad.addColorStop(0,"rgba(0,0,0,0)");
+grad.addColorStop(1,"rgba(0,0,0,0.6)");
+
+ctx.fillStyle=grad;
+
+ctx.fillRect(0,0,canvas.width,canvas.height);
 
 }
 
-function portraitBlur(){
+let drawing=false;
+let tool="brush";
 
-ctx.filter="blur(6px)";
-ctx.drawImage(canvas,0,0);
-ctx.filter="none";
-
+function setBrush(){
+tool="brush";
 }
 
-function cartoon(){
-
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
-
-for(let i=0;i<d.length;i+=4){
-
-d[i]=Math.round(d[i]/50)*50;
-d[i+1]=Math.round(d[i+1]/50)*50;
-d[i+2]=Math.round(d[i+2]/50)*50;
-
+function setEraser(){
+tool="eraser";
 }
 
-ctx.putImageData(imageData,0,0);
+canvas.addEventListener("mousedown",()=>drawing=true);
+canvas.addEventListener("mouseup",()=>drawing=false);
 
+canvas.addEventListener("mousemove",(e)=>{
+
+if(!drawing) return;
+
+ctx.lineWidth=document.getElementById("size").value;
+ctx.lineCap="round";
+
+if(tool==="brush"){
+ctx.strokeStyle=document.getElementById("color").value;
+}else{
+ctx.strokeStyle="white";
 }
 
-function sketch(){
+ctx.lineTo(e.offsetX,e.offsetY);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(e.offsetX,e.offsetY);
 
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
+});
 
-for(let i=0;i<d.length;i+=4){
+function addText(){
 
-const gray=(d[i]+d[i+1]+d[i+2])/3;
+const text=document.getElementById("textInput").value;
 
-d[i]=gray;
-d[i+1]=gray;
-d[i+2]=gray;
+ctx.font="40px Arial";
+ctx.fillStyle="white";
 
-}
-
-ctx.putImageData(imageData,0,0);
+ctx.fillText(text,50,80);
 
 }
 
 function saveProject(){
 
-localStorage.setItem("aiProImage",canvas.toDataURL());
+localStorage.setItem("imgProject",canvas.toDataURL());
 
 alert("Project saved");
 
@@ -234,7 +226,7 @@ alert("Project saved");
 
 function loadProject(){
 
-const data=localStorage.getItem("aiProImage");
+const data=localStorage.getItem("imgProject");
 
 if(!data) return;
 
@@ -255,7 +247,7 @@ function download(){
 
 const link=document.createElement("a");
 
-link.download="ai-pro-image.png";
+link.download="image.png";
 link.href=canvas.toDataURL();
 
 link.click();
