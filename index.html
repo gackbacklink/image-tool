@@ -68,6 +68,11 @@ background:#00c6ff;
 
 <h3>🎨 Filters</h3>
 
+<button onclick="enableCrop()">✂ Crop Mode</button>
+<button onclick="applyHD()">🖼 HD Export</button>
+  
+<h3>🎨 Filters</h3>
+
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('grayscale(100%)')">Grayscale</button>
 <button onclick="setFilter('sepia(100%)')">Sepia</button>
@@ -100,6 +105,41 @@ function saveState(){
 history.push(canvas.toDataURL());
 }
 
+let isCropping=false;
+let startX,startY,endX,endY;
+
+function enableCrop(){
+isCropping=true;
+alert("Drag di gambar untuk crop ✂️");
+}
+
+canvas.addEventListener("mousedown",(e)=>{
+if(!isCropping) return;
+startX=e.offsetX;
+startY=e.offsetY;
+});
+
+canvas.addEventListener("mouseup",(e)=>{
+if(!isCropping) return;
+
+endX=e.offsetX;
+endY=e.offsetY;
+
+const width=endX-startX;
+const height=endY-startY;
+
+const imageData=ctx.getImageData(startX,startY,width,height);
+
+canvas.width=width;
+canvas.height=height;
+
+ctx.putImageData(imageData,0,0);
+
+isCropping=false;
+saveState();
+});
+
+  
 function restoreState(data){
 img.onload=function(){
 canvas.width=img.width;
