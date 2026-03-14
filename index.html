@@ -97,7 +97,6 @@ button:hover{
 
 <br><br>
 
-<button onclick="cropImage()">✂️ Crop</button>
 <button onclick="downloadImage()">📥 Download</button>
 </div>
 
@@ -161,30 +160,7 @@ function drawImage(){
 
 brightness.oninput = drawImage;
 blur.oninput = drawImage;
-
-// Simple Crop Drag
-canvas.addEventListener("mousedown",(e)=>{
-  startX = e.offsetX;
-  startY = e.offsetY;
-  isDragging = true;
-});
-
-canvas.addEventListener("mouseup",(e)=>{
-  if(!isDragging) return;
-  isDragging = false;
-
-  const endX = e.offsetX;
-  const endY = e.offsetY;
-
-  const width = endX - startX;
-  const height = endY - startY;
-
-  const imageData = ctx.getImageData(startX,startY,width,height);
-
-  canvas.width = width;
-  canvas.height = height;
-
-  ctx.putImageData(imageData,0,0);
+  
 });
 
 function cropImage(){
