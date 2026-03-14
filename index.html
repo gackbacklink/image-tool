@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Image Studio</title>
+<title>AI Image Studio Pro</title>
 
 <style>
 
@@ -26,7 +26,6 @@ max-width:100%;
 background:white;
 border-radius:10px;
 margin-top:15px;
-cursor:crosshair;
 }
 
 button{
@@ -52,7 +51,7 @@ background:#00c6ff;
 
 <div class="container">
 
-<h2>🚀 AI Image Studio Level 17</h2>
+<h2>🚀 AI Image Studio Level 18</h2>
 
 <input type="file" id="upload">
 
@@ -64,17 +63,18 @@ background:#00c6ff;
 
 <h3>🤖 AI Tools</h3>
 
-<button onclick="aiEnhance()">AI Enhance</button>
-<button onclick="removeNoise()">Remove Noise</button>
-<button onclick="colorBoost()">Color Boost</button>
-<button onclick="autoBalance()">Auto Balance</button>
+<button onclick="aiUpscale()">AI Upscale</button>
+<button onclick="smoothSkin()">Smooth</button>
+<button onclick="vibrance()">Vibrance</button>
+<button onclick="autoEnhance()">Auto Enhance</button>
 
 <br><br>
 
 <h3>🎨 Effects</h3>
 
-<button onclick="blurBackground()">Portrait Blur</button>
-<button onclick="sketchEffect()">Sketch</button>
+<button onclick="portraitBlur()">Portrait Blur</button>
+<button onclick="cartoon()">Cartoon</button>
+<button onclick="sketch()">Sketch</button>
 
 <br><br>
 
@@ -121,7 +121,32 @@ reader.readAsDataURL(file);
 
 });
 
-function aiEnhance(){
+function aiUpscale(){
+
+const temp=document.createElement("canvas");
+const tctx=temp.getContext("2d");
+
+temp.width=canvas.width*2;
+temp.height=canvas.height*2;
+
+tctx.drawImage(canvas,0,0,temp.width,temp.height);
+
+canvas.width=temp.width;
+canvas.height=temp.height;
+
+ctx.drawImage(temp,0,0);
+
+}
+
+function smoothSkin(){
+
+ctx.filter="blur(1px)";
+ctx.drawImage(canvas,0,0);
+ctx.filter="none";
+
+}
+
+function vibrance(){
 
 const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
 const d=imageData.data;
@@ -138,50 +163,14 @@ ctx.putImageData(imageData,0,0);
 
 }
 
-function removeNoise(){
+function autoEnhance(){
 
 const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
 const d=imageData.data;
 
 for(let i=0;i<d.length;i+=4){
 
-const avg=(d[i]+d[i+1]+d[i+2])/3;
-
-d[i]=(d[i]+avg)/2;
-d[i+1]=(d[i+1]+avg)/2;
-d[i+2]=(d[i+2]+avg)/2;
-
-}
-
-ctx.putImageData(imageData,0,0);
-
-}
-
-function colorBoost(){
-
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
-
-for(let i=0;i<d.length;i+=4){
-
-d[i]*=1.2;
-d[i+1]*=1.1;
-d[i+2]*=1.1;
-
-}
-
-ctx.putImageData(imageData,0,0);
-
-}
-
-function autoBalance(){
-
-const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const d=imageData.data;
-
-for(let i=0;i<d.length;i+=4){
-
-d[i]=Math.min(255,d[i]*1.1);
+d[i]=Math.min(255,d[i]*1.2);
 d[i+1]=Math.min(255,d[i+1]*1.1);
 d[i+2]=Math.min(255,d[i+2]*1.1);
 
@@ -191,15 +180,32 @@ ctx.putImageData(imageData,0,0);
 
 }
 
-function blurBackground(){
+function portraitBlur(){
 
-ctx.filter="blur(5px)";
+ctx.filter="blur(6px)";
 ctx.drawImage(canvas,0,0);
 ctx.filter="none";
 
 }
 
-function sketchEffect(){
+function cartoon(){
+
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
+
+for(let i=0;i<d.length;i+=4){
+
+d[i]=Math.round(d[i]/50)*50;
+d[i+1]=Math.round(d[i+1]/50)*50;
+d[i+2]=Math.round(d[i+2]/50)*50;
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function sketch(){
 
 const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
 const d=imageData.data;
@@ -220,7 +226,7 @@ ctx.putImageData(imageData,0,0);
 
 function saveProject(){
 
-localStorage.setItem("aiImage",canvas.toDataURL());
+localStorage.setItem("aiProImage",canvas.toDataURL());
 
 alert("Project saved");
 
@@ -228,7 +234,7 @@ alert("Project saved");
 
 function loadProject(){
 
-const data=localStorage.getItem("aiImage");
+const data=localStorage.getItem("aiProImage");
 
 if(!data) return;
 
@@ -249,7 +255,7 @@ function download(){
 
 const link=document.createElement("a");
 
-link.download="ai-image.png";
+link.download="ai-pro-image.png";
 link.href=canvas.toDataURL();
 
 link.click();
