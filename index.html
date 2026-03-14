@@ -104,6 +104,40 @@ button:hover{
 </div>
 
 <script>
+const upload = document.getElementById("upload");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const brightness = document.getElementById("brightness");
+const blur = document.getElementById("blur");
+
+let img = new Image();
+
+upload.addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    img.onload = function(){
+      canvas.width = img.width;
+      canvas.height = img.height;
+      drawImage();
+    }
+    img.src = e.target.result;
+  }
+  reader.readAsDataURL(file);
+});
+
+function drawImage(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.filter = `brightness(${brightness.value}%) blur(${blur.value}px)`;
+  ctx.drawImage(img,0,0);
+}
+
+brightness.oninput = drawImage;
+blur.oninput = drawImage;
+
 function resizeCustom(){
   const width = parseInt(document.getElementById("newWidth").value);
   const height = parseInt(document.getElementById("newHeight").value);
@@ -126,54 +160,14 @@ function resizeCustom(){
 
   ctx.drawImage(temp,0,0);
 }
-const upload = document.getElementById("upload");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const brightness = document.getElementById("brightness");
-const blur = document.getElementById("blur");
-
-let img = new Image();
-let startX, startY, isDragging = false;
-
-upload.addEventListener("change", function(){
-  const file = this.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e){
-    img.onload = function(){
-      canvas.width = img.width;
-      canvas.height = img.height;
-      drawImage();
-    }
-    img.src = e.target.result;
-  }
-  reader.readAsDataURL(file);
-});
-
-function drawImage(){
-  ctx.filter = `brightness(${brightness.value}%) blur(${blur.value}px)`;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img,0,0);
-}
-
-brightness.oninput = drawImage;
-blur.oninput = drawImage;
-  
-});
-
-function cropImage(){
-  alert("Drag di gambar untuk crop ✂️");
-}
 
 function downloadImage(){
   const link = document.createElement("a");
-  link.download = "image-pro.png";
-  link.href = canvas.toDataURL();
+  link.download = "image.png";
+  link.href = canvas.toDataURL("image/png");
   link.click();
 }
 </script>
-
+  
 </body>
 </html>
