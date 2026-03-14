@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultra Image Studio</title>
+<title>Ultimate Image Studio</title>
 
 <style>
+
 body{
 margin:0;
 font-family:Arial;
@@ -15,7 +16,7 @@ text-align:center;
 }
 
 .container{
-max-width:1100px;
+max-width:1200px;
 margin:auto;
 padding:20px;
 }
@@ -25,6 +26,7 @@ max-width:100%;
 background:white;
 border-radius:10px;
 margin-top:15px;
+cursor:crosshair;
 }
 
 button{
@@ -46,12 +48,6 @@ background:#00c6ff;
 width:200px;
 }
 
-.drop{
-border:2px dashed #555;
-padding:20px;
-margin-bottom:10px;
-border-radius:10px;
-}
 </style>
 </head>
 
@@ -59,11 +55,7 @@ border-radius:10px;
 
 <div class="container">
 
-<h2>🚀 Ultra Image Studio Level 12</h2>
-
-<div class="drop" id="drop">
-Drag & Drop Image Here
-</div>
+<h2>🚀 Ultimate Image Studio Level 15</h2>
 
 <input type="file" id="upload">
 
@@ -73,13 +65,13 @@ Drag & Drop Image Here
 
 <h3>🎚 Adjust</h3>
 
-Brightness  
+Brightness
 <input class="slider" id="brightness" type="range" min="50" max="200" value="100">
 
-Contrast  
+Contrast
 <input class="slider" id="contrast" type="range" min="50" max="200" value="100">
 
-Saturation  
+Saturation
 <input class="slider" id="saturation" type="range" min="50" max="200" value="100">
 
 <br><br>
@@ -89,21 +81,60 @@ Saturation
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('grayscale(100%)')">Grayscale</button>
 <button onclick="setFilter('sepia(100%)')">Sepia</button>
-<button onclick="setFilter('blur(3px)')">Blur</button>
 <button onclick="setFilter('invert(100%)')">Invert</button>
+<button onclick="setFilter('blur(3px)')">Blur</button>
+<button onclick="setFilter('contrast(200%)')">High Contrast</button>
 <button onclick="setFilter('hue-rotate(180deg)')">Cool</button>
-<button onclick="setFilter('hue-rotate(320deg)')">Warm</button>
-<button onclick="setFilter('contrast(180%) brightness(120%)')">Cinematic</button>
+<button onclick="setFilter('hue-rotate(330deg)')">Warm</button>
 
 <br><br>
 
-<h3>✨ Tools</h3>
+<h3>🖌 Draw Tools</h3>
 
-<button onclick="autoEnhance()">Auto Enhance</button>
+<button onclick="setBrush()">Brush</button>
+<button onclick="setEraser()">Eraser</button>
+
+Size
+<input type="range" id="brushSize" min="2" max="40" value="5">
+
+Color
+<input type="color" id="brushColor" value="#ff0000">
+
+<br><br>
+
+<h3>🧩 Add Text</h3>
+
+<input id="textInput" placeholder="Text">
+<input id="textSize" type="number" value="40">
+
+<button onclick="addText()">Add</button>
+
+<br><br>
+
+<h3>🔄 Rotate</h3>
+
+<button onclick="rotate(90)">90°</button>
+<button onclick="rotate(180)">180°</button>
+<button onclick="rotate(270)">270°</button>
+
+<br><br>
+
+<h3>🔍 Zoom</h3>
+
+<button onclick="zoom(1.2)">Zoom In</button>
+<button onclick="zoom(0.8)">Zoom Out</button>
+
+<br><br>
+
+<h3>📐 Resize</h3>
 
 <button onclick="resizeImage(1080,1080)">Instagram</button>
 <button onclick="resizeImage(1920,1080)">YouTube</button>
 <button onclick="resizeImage(1000,1000)">Square</button>
+
+<br><br>
+
+<button onclick="autoEnhance()">✨ Auto Enhance</button>
 
 <br><br>
 
@@ -113,145 +144,192 @@ Saturation
 
 <script>
 
-const upload = document.getElementById("upload");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const upload=document.getElementById("upload");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-const brightness = document.getElementById("brightness");
-const contrast = document.getElementById("contrast");
-const saturation = document.getElementById("saturation");
+const brightness=document.getElementById("brightness");
+const contrast=document.getElementById("contrast");
+const saturation=document.getElementById("saturation");
 
-let img = new Image();
-let currentFilter = "none";
+let img=new Image();
+let currentFilter="none";
 
-upload.addEventListener("change", loadImage);
+let drawing=false;
+let tool="brush";
 
-function loadImage(){
+upload.addEventListener("change",function(){
 
-const file = this.files[0];
+const file=this.files[0];
 if(!file) return;
 
-const reader = new FileReader();
+const reader=new FileReader();
 
-reader.onload = function(e){
+reader.onload=function(e){
 
-img.onload = function(){
+img.onload=function(){
 
-canvas.width = img.width;
-canvas.height = img.height;
+canvas.width=img.width;
+canvas.height=img.height;
 
 drawImage();
 
 }
 
-img.src = e.target.result;
+img.src=e.target.result;
 
 }
 
 reader.readAsDataURL(file);
 
-}
+});
 
 function drawImage(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.filter = `
+ctx.filter=`
 brightness(${brightness.value}%)
 contrast(${contrast.value}%)
 saturate(${saturation.value}%)
 ${currentFilter}
 `;
 
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
+ctx.drawImage(img,0,0);
 
 }
 
-brightness.oninput = drawImage;
-contrast.oninput = drawImage;
-saturation.oninput = drawImage;
+brightness.oninput=drawImage;
+contrast.oninput=drawImage;
+saturation.oninput=drawImage;
 
 function setFilter(filter){
 
-currentFilter = filter;
-
+currentFilter=filter;
 drawImage();
 
 }
 
-function autoEnhance(){
+function setBrush(){
 
-brightness.value = 120;
-contrast.value = 130;
-saturation.value = 120;
-
-drawImage();
+tool="brush";
 
 }
 
-function resizeImage(w,h){
+function setEraser(){
 
-const temp = document.createElement("canvas");
-const tctx = temp.getContext("2d");
+tool="eraser";
 
-temp.width = w;
-temp.height = h;
+}
 
-tctx.drawImage(canvas,0,0,w,h);
+canvas.addEventListener("mousedown",()=>{
 
-canvas.width = w;
-canvas.height = h;
+drawing=true;
+
+});
+
+canvas.addEventListener("mouseup",()=>{
+
+drawing=false;
+ctx.beginPath();
+
+});
+
+canvas.addEventListener("mousemove",(e)=>{
+
+if(!drawing) return;
+
+ctx.lineWidth=document.getElementById("brushSize").value;
+ctx.lineCap="round";
+
+if(tool==="brush"){
+ctx.strokeStyle=document.getElementById("brushColor").value;
+}else{
+ctx.strokeStyle="white";
+}
+
+ctx.lineTo(e.offsetX,e.offsetY);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(e.offsetX,e.offsetY);
+
+});
+
+function addText(){
+
+const text=document.getElementById("textInput").value;
+const size=document.getElementById("textSize").value;
+
+ctx.font=size+"px Arial";
+ctx.fillStyle="white";
+ctx.fillText(text,50,80);
+
+}
+
+function rotate(deg){
+
+const temp=document.createElement("canvas");
+const tctx=temp.getContext("2d");
+
+temp.width=canvas.height;
+temp.height=canvas.width;
+
+tctx.translate(temp.width/2,temp.height/2);
+tctx.rotate(deg*Math.PI/180);
+
+tctx.drawImage(canvas,-canvas.width/2,-canvas.height/2);
+
+canvas.width=temp.width;
+canvas.height=temp.height;
 
 ctx.drawImage(temp,0,0);
 
 }
 
-function downloadImage(){
+function zoom(z){
 
-const link = document.createElement("a");
-
-link.download = "image-edit.png";
-
-link.href = canvas.toDataURL();
-
-link.click();
+ctx.scale(z,z);
+ctx.drawImage(canvas,0,0);
 
 }
 
-const drop = document.getElementById("drop");
+function resizeImage(w,h){
 
-drop.addEventListener("dragover",(e)=>{
+const temp=document.createElement("canvas");
+const tctx=temp.getContext("2d");
 
-e.preventDefault();
+temp.width=w;
+temp.height=h;
 
-});
+tctx.drawImage(canvas,0,0,w,h);
 
-drop.addEventListener("drop",(e)=>{
+canvas.width=w;
+canvas.height=h;
 
-e.preventDefault();
+ctx.drawImage(temp,0,0);
 
-const file = e.dataTransfer.files[0];
+}
 
-const reader = new FileReader();
+function autoEnhance(){
 
-reader.onload = function(ev){
-
-img.onload = function(){
-
-canvas.width = img.width;
-canvas.height = img.height;
+brightness.value=120;
+contrast.value=130;
+saturation.value=120;
 
 drawImage();
 
 }
 
-img.src = ev.target.result;
+function downloadImage(){
+
+const link=document.createElement("a");
+
+link.download="edited.png";
+link.href=canvas.toDataURL();
+
+link.click();
 
 }
-
-reader.readAsDataURL(file);
-
-});
 
 </script>
 
