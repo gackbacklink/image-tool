@@ -3,6 +3,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 let img = new Image();
+let originalImg = null; // simpan gambar asli
 
 // Upload gambar
 imageInput.addEventListener('change', (e) => {
@@ -11,21 +12,31 @@ imageInput.addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = (event) => {
     img.src = event.target.result;
+    originalImg = new Image();
+    originalImg.src = event.target.result; // simpan gambar asli
   };
   reader.readAsDataURL(file);
 });
 
-// Load gambar → canvas HD
+// Load gambar → HD
 img.onload = () => {
-  const scale = 2; // HD
-  canvas.width = img.width * scale;
-  canvas.height = img.height * scale;
-  ctx.scale(scale, scale);
-  ctx.drawImage(img, 0, 0);
+  drawImageHD();
 };
+
+// Fungsi draw HD
+function drawImageHD() {
+  if(!originalImg) return;
+  const scale = 2; // HD
+  canvas.width = originalImg.width * scale;
+  canvas.height = originalImg.height * scale;
+  ctx.setTransform(1,0,0,1,0,0); // reset transform
+  ctx.scale(scale, scale);
+  ctx.drawImage(originalImg, 0, 0);
+}
 
 // ----- FUNGSI EFEK -----
 function applySepia() {
+  drawImageHD();
   const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
   const data = imageData.data;
   for(let i=0;i<data.length;i+=4){
@@ -38,17 +49,19 @@ function applySepia() {
 }
 
 function invertColors() {
+  drawImageHD();
   const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
   const data = imageData.data;
   for(let i=0;i<data.length;i+=4){
-    data[i] = 255 - data[i];       
-    data[i+1] = 255 - data[i+1];   
-    data[i+2] = 255 - data[i+2];   
+    data[i] = 255 - data[i];
+    data[i+1] = 255 - data[i+1];
+    data[i+2] = 255 - data[i+2];
   }
   ctx.putImageData(imageData,0,0);
 }
 
-function adjustBrightness(value){ 
+function adjustBrightness(value){
+  drawImageHD();
   const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
   const data = imageData.data;
   for(let i=0;i<data.length;i+=4){
@@ -59,32 +72,38 @@ function adjustBrightness(value){
   ctx.putImageData(imageData,0,0);
 }
 
+function resetImage(){
+  drawImageHD();
+}
+
 // ----- Resize -----
 document.getElementById('resizeBtn').addEventListener('click', () => {
-  const newWidth = prompt("Masukkan lebar baru (px):", img.width);
-  const newHeight = prompt("Masukkan tinggi baru (px):", img.height);
+  if(!originalImg) return;
+  const newWidth = prompt("Masukkan lebar baru (px):", originalImg.width);
+  const newHeight = prompt("Masukkan tinggi baru (px):", originalImg.height);
   if(newWidth && newHeight){
     canvas.width = newWidth;
     canvas.height = newHeight;
-    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+    ctx.drawImage(originalImg,0,0,newWidth,newHeight);
   }
 });
 
 // ----- Grayscale -----
 document.getElementById('grayscaleBtn').addEventListener('click', () => {
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  drawImageHD();
+  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
   const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+  for(let i=0;i<data.length;i+=4){
+    const avg = (data[i]+data[i+1]+data[i+2])/3;
     data[i] = data[i+1] = data[i+2] = avg;
   }
-  ctx.putImageData(imageData, 0, 0);
+  ctx.putImageData(imageData,0,0);
 });
 
 // ----- Download HD -----
 document.getElementById('downloadBtn').addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'image-hd.png';
-  link.href = canvas.toDataURL('image/png', 1.0);
+  link.href = canvas.toDataURL('image/png',1.0);
   link.click();
 });
