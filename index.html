@@ -10,22 +10,21 @@
   <div class="container">
     <h1>Image Tool HD</h1>
 
-    <!-- Upload gambar -->
     <input type="file" id="imageInput" accept="image/*">
 
-    <!-- Preview canvas -->
     <div class="preview">
       <canvas id="canvas"></canvas>
     </div>
 
-    <!-- Tools / tombol -->
     <div class="tools">
       <button id="resizeBtn">Resize</button>
       <button id="grayscaleBtn">Grayscale</button>
       <button onclick="applySepia()">Sepia</button>
       <button onclick="invertColors()">Invert</button>
       <button onclick="adjustBrightness(30)">Bright +30</button>
-      <button id="downloadBtn">Download</button>
+      <button onclick="adjustBrightness(-30)">Dark -30</button>
+      <button onclick="resetImage()">Reset</button>
+      <button id="downloadBtn">Download HD</button>
     </div>
   </div>
 
