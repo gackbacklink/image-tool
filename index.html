@@ -1,23 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
-<br><br>
-
-📐 Width:
-<input type="number" id="newWidth" placeholder="1000">
-
-📐 Height:
-<input type="number" id="newHeight" placeholder="1000">
-
-<br>
-<button onclick="resizeCustom()">🖼 Resize Custom</button>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Tool Pro Level 3</title>
+<title>Image Tool Pro</title>
 
 <style>
 body{
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   background:#111;
   color:white;
   text-align:center;
@@ -25,34 +15,20 @@ body{
 }
 
 .container{
-  background:#1e1e1e;
+  background:#1c1c1c;
   padding:20px;
-  border-radius:12px;
-  max-width:700px;
+  border-radius:15px;
+  max-width:800px;
   margin:auto;
+  box-shadow:0 0 20px rgba(0,123,255,0.3);
 }
 
 canvas{
   max-width:100%;
   margin-top:15px;
   border-radius:10px;
-  cursor:crosshair;
 }
 
-.controls{
-  margin-top:15px;
-}
-
-input[type=range]{
-  width:200px;
-}
-button{
-  margin:5px;
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
 button{
   margin:5px;
   padding:10px 15px;
@@ -68,39 +44,48 @@ button:hover{
   opacity:0.85;
 }
 
-.container{
-  background:#1a1a1a;
-  padding:25px;
-  border-radius:15px;
-  max-width:800px;
-  margin:auto;
-  box-shadow:0 0 25px rgba(0,123,255,0.3);
+input[type="number"]{
+  width:100px;
+  padding:5px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🔥 Image Tool Pro</h1>
+<h1>🚀 Image Tool Pro</h1>
 
 <div class="container">
-<input type="file" id="upload" accept="image/*"><br>
 
-<div class="controls">
-<br>
+<input type="file" id="upload" accept="image/*">
+
+<br><br>
+
 🎚 Brightness
 <input type="range" id="brightness" min="0" max="200" value="100">
 
-<br>
-🎚 Blur
+<br><br>
+
+🌫 Blur
 <input type="range" id="blur" min="0" max="10" value="0">
 
 <br><br>
 
+📐 Width:
+<input type="number" id="newWidth" placeholder="1000">
+
+📐 Height:
+<input type="number" id="newHeight" placeholder="1000">
+
+<br><br>
+
+<button onclick="resizeCustom()">🖼 Resize</button>
 <button onclick="downloadImage()">📥 Download</button>
-</div>
+
+<br>
 
 <canvas id="canvas"></canvas>
+
 </div>
 
 <script>
@@ -132,7 +117,7 @@ upload.addEventListener("change", function(){
 function drawImage(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.filter = `brightness(${brightness.value}%) blur(${blur.value}px)`;
-  ctx.drawImage(img,0,0);
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
 }
 
 brightness.oninput = drawImage;
@@ -163,11 +148,11 @@ function resizeCustom(){
 
 function downloadImage(){
   const link = document.createElement("a");
-  link.download = "image.png";
+  link.download = "edited-image.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
 </script>
-  
+
 </body>
 </html>
