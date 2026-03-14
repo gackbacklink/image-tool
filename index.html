@@ -3,45 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pro Studio Level 20</title>
+<title>Image Editor Numeric Crop</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#0b1220;
+background:#0f172a;
 color:white;
-display:flex;
-height:100vh;
+text-align:center;
 }
 
-.sidebar{
-width:250px;
-background:#111a2e;
-padding:15px;
-overflow:auto;
-}
-
-.main{
-flex:1;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
+.container{
+padding:20px;
+max-width:1000px;
+margin:auto;
 }
 
 canvas{
-max-width:95%;
+max-width:100%;
 background:white;
 border-radius:10px;
+margin-top:15px;
+}
+
+input, button{
+padding:8px;
+margin:5px;
+border-radius:6px;
+border:none;
 }
 
 button{
-width:100%;
-padding:8px;
-margin:4px 0;
-border:none;
-border-radius:6px;
 cursor:pointer;
 background:#1e293b;
 color:white;
@@ -52,102 +45,58 @@ button:hover{
 background:#00c6ff;
 }
 
+.controls{
+margin-top:15px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
+<div class="container">
 
-<h3>🛠 Tools</h3>
+<h2>🖼 Image Editor - Numeric Crop</h2>
 
-<input type="file" id="upload">
+<input type="file" id="upload" accept="image/*">
 
-<button onclick="undo()">↩ Undo</button>
-<button onclick="redo()">↪ Redo</button>
+<br><br>
 
-<h3>🎨 Filters</h3>
+<canvas id="canvas"></canvas>
 
-<button onclick="enableCrop()">✂ Crop Mode</button>
-<button onclick="applyHD()">🖼 HD Export</button>
-  
-<h3>🎨 Filters</h3>
+<div class="controls">
+
+<h3>🎨 Filter</h3>
 
 <button onclick="setFilter('none')">Normal</button>
 <button onclick="setFilter('grayscale(100%)')">Grayscale</button>
 <button onclick="setFilter('sepia(100%)')">Sepia</button>
-<button onclick="setFilter('contrast(200%)')">Contrast</button>
+<button onclick="setFilter('contrast(180%)')">Contrast</button>
 <button onclick="setFilter('brightness(130%)')">Bright</button>
 
-<h3>📤 Export</h3>
+<h3>✂ Crop Pakai Angka</h3>
 
-<button onclick="exportPNG()">Download PNG</button>
-<button onclick="exportJPG()">Download JPG</button>
+<input type="number" id="cropWidth" placeholder="Width">
+<input type="number" id="cropHeight" placeholder="Height">
+<br>
+<button onclick="cropByNumber()">Crop Sekarang</button>
+
+<h3>📥 Download</h3>
+
+<button onclick="downloadImage()">Download</button>
 
 </div>
 
-<div class="main">
-<canvas id="canvas"></canvas>
 </div>
 
 <script>
 
+const upload=document.getElementById("upload");
 const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
-const upload=document.getElementById("upload");
 
 let img=new Image();
-let history=[];
-let redoStack=[];
 let currentFilter="none";
-
-function saveState(){
-history.push(canvas.toDataURL());
-}
-
-let isCropping=false;
-let startX,startY,endX,endY;
-
-function enableCrop(){
-isCropping=true;
-alert("Drag di gambar untuk crop ✂️");
-}
-
-canvas.addEventListener("mousedown",(e)=>{
-if(!isCropping) return;
-startX=e.offsetX;
-startY=e.offsetY;
-});
-
-canvas.addEventListener("mouseup",(e)=>{
-if(!isCropping) return;
-
-endX=e.offsetX;
-endY=e.offsetY;
-
-const width=endX-startX;
-const height=endY-startY;
-
-const imageData=ctx.getImageData(startX,startY,width,height);
-
-canvas.width=width;
-canvas.height=height;
-
-ctx.putImageData(imageData,0,0);
-
-isCropping=false;
-saveState();
-});
-
-  
-function restoreState(data){
-img.onload=function(){
-canvas.width=img.width;
-canvas.height=img.height;
-ctx.drawImage(img,0,0);
-}
-img.src=data;
-}
 
 upload.addEventListener("change",function(){
 
@@ -163,7 +112,6 @@ img.onload=function(){
 canvas.width=img.width;
 canvas.height=img.height;
 
-saveState();
 ctx.drawImage(img,0,0);
 
 }
@@ -181,48 +129,41 @@ function setFilter(filter){
 currentFilter=filter;
 
 ctx.filter=currentFilter;
-ctx.drawImage(canvas,0,0);
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
 ctx.filter="none";
 
 }
 
-function undo(){
+function cropByNumber(){
 
-if(history.length>1){
+const newWidth=parseInt(document.getElementById("cropWidth").value);
+const newHeight=parseInt(document.getElementById("cropHeight").value);
 
-redoStack.push(history.pop());
-restoreState(history[history.length-1]);
+if(!newWidth || !newHeight){
+alert("Masukkan width dan height dulu!");
+return;
+}
+
+const temp=document.createElement("canvas");
+const tctx=temp.getContext("2d");
+
+temp.width=newWidth;
+temp.height=newHeight;
+
+tctx.drawImage(canvas,0,0,newWidth,newHeight);
+
+canvas.width=newWidth;
+canvas.height=newHeight;
+
+ctx.drawImage(temp,0,0);
 
 }
 
-}
-
-function redo(){
-
-if(redoStack.length>0){
-
-const data=redoStack.pop();
-history.push(data);
-restoreState(data);
-
-}
-
-}
-
-function exportPNG(){
+function downloadImage(){
 
 const link=document.createElement("a");
-link.download="project.png";
+link.download="edited-image.png";
 link.href=canvas.toDataURL("image/png");
-link.click();
-
-}
-
-function exportJPG(){
-
-const link=document.createElement("a");
-link.download="project.jpg";
-link.href=canvas.toDataURL("image/jpeg",0.9);
 link.click();
 
 }
