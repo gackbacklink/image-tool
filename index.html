@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Image Studio</title>
+<title>AI Image Studio</title>
 
 <style>
 
@@ -31,7 +31,7 @@ cursor:crosshair;
 
 button{
 padding:8px 12px;
-margin:4px;
+margin:5px;
 border:none;
 border-radius:8px;
 cursor:pointer;
@@ -44,18 +44,15 @@ button:hover{
 background:#00c6ff;
 }
 
-.slider{
-width:200px;
-}
-
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>🚀 Ultimate Image Studio Level 15</h2>
+<h2>🚀 AI Image Studio Level 17</h2>
 
 <input type="file" id="upload">
 
@@ -63,106 +60,46 @@ width:200px;
 
 <canvas id="canvas"></canvas>
 
-<h3>🎚 Adjust</h3>
+<br><br>
 
-Brightness
-<input class="slider" id="brightness" type="range" min="50" max="200" value="100">
+<h3>🤖 AI Tools</h3>
 
-Contrast
-<input class="slider" id="contrast" type="range" min="50" max="200" value="100">
-
-Saturation
-<input class="slider" id="saturation" type="range" min="50" max="200" value="100">
+<button onclick="aiEnhance()">AI Enhance</button>
+<button onclick="removeNoise()">Remove Noise</button>
+<button onclick="colorBoost()">Color Boost</button>
+<button onclick="autoBalance()">Auto Balance</button>
 
 <br><br>
 
-<h3>🎨 Filters</h3>
+<h3>🎨 Effects</h3>
 
-<button onclick="setFilter('none')">Normal</button>
-<button onclick="setFilter('grayscale(100%)')">Grayscale</button>
-<button onclick="setFilter('sepia(100%)')">Sepia</button>
-<button onclick="setFilter('invert(100%)')">Invert</button>
-<button onclick="setFilter('blur(3px)')">Blur</button>
-<button onclick="setFilter('contrast(200%)')">High Contrast</button>
-<button onclick="setFilter('hue-rotate(180deg)')">Cool</button>
-<button onclick="setFilter('hue-rotate(330deg)')">Warm</button>
+<button onclick="blurBackground()">Portrait Blur</button>
+<button onclick="sketchEffect()">Sketch</button>
 
 <br><br>
 
-<h3>🖌 Draw Tools</h3>
+<h3>💾 Project</h3>
 
-<button onclick="setBrush()">Brush</button>
-<button onclick="setEraser()">Eraser</button>
-
-Size
-<input type="range" id="brushSize" min="2" max="40" value="5">
-
-Color
-<input type="color" id="brushColor" value="#ff0000">
+<button onclick="saveProject()">Save</button>
+<button onclick="loadProject()">Load</button>
 
 <br><br>
 
-<h3>🧩 Add Text</h3>
-
-<input id="textInput" placeholder="Text">
-<input id="textSize" type="number" value="40">
-
-<button onclick="addText()">Add</button>
-
-<br><br>
-
-<h3>🔄 Rotate</h3>
-
-<button onclick="rotate(90)">90°</button>
-<button onclick="rotate(180)">180°</button>
-<button onclick="rotate(270)">270°</button>
-
-<br><br>
-
-<h3>🔍 Zoom</h3>
-
-<button onclick="zoom(1.2)">Zoom In</button>
-<button onclick="zoom(0.8)">Zoom Out</button>
-
-<br><br>
-
-<h3>📐 Resize</h3>
-
-<button onclick="resizeImage(1080,1080)">Instagram</button>
-<button onclick="resizeImage(1920,1080)">YouTube</button>
-<button onclick="resizeImage(1000,1000)">Square</button>
-
-<br><br>
-
-<button onclick="autoEnhance()">✨ Auto Enhance</button>
-
-<br><br>
-
-<button onclick="downloadImage()">📥 Download</button>
+<button onclick="download()">📥 Download</button>
 
 </div>
 
 <script>
 
-const upload=document.getElementById("upload");
 const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
-
-const brightness=document.getElementById("brightness");
-const contrast=document.getElementById("contrast");
-const saturation=document.getElementById("saturation");
+const upload=document.getElementById("upload");
 
 let img=new Image();
-let currentFilter="none";
-
-let drawing=false;
-let tool="brush";
 
 upload.addEventListener("change",function(){
 
 const file=this.files[0];
-if(!file) return;
-
 const reader=new FileReader();
 
 reader.onload=function(e){
@@ -172,7 +109,7 @@ img.onload=function(){
 canvas.width=img.width;
 canvas.height=img.height;
 
-drawImage();
+ctx.drawImage(img,0,0);
 
 }
 
@@ -184,147 +121,135 @@ reader.readAsDataURL(file);
 
 });
 
-function drawImage(){
+function aiEnhance(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
 
-ctx.filter=`
-brightness(${brightness.value}%)
-contrast(${contrast.value}%)
-saturate(${saturation.value}%)
-${currentFilter}
-`;
+for(let i=0;i<d.length;i+=4){
+
+d[i]*=1.15;
+d[i+1]*=1.15;
+d[i+2]*=1.15;
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function removeNoise(){
+
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
+
+for(let i=0;i<d.length;i+=4){
+
+const avg=(d[i]+d[i+1]+d[i+2])/3;
+
+d[i]=(d[i]+avg)/2;
+d[i+1]=(d[i+1]+avg)/2;
+d[i+2]=(d[i+2]+avg)/2;
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function colorBoost(){
+
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
+
+for(let i=0;i<d.length;i+=4){
+
+d[i]*=1.2;
+d[i+1]*=1.1;
+d[i+2]*=1.1;
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function autoBalance(){
+
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
+
+for(let i=0;i<d.length;i+=4){
+
+d[i]=Math.min(255,d[i]*1.1);
+d[i+1]=Math.min(255,d[i+1]*1.1);
+d[i+2]=Math.min(255,d[i+2]*1.1);
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function blurBackground(){
+
+ctx.filter="blur(5px)";
+ctx.drawImage(canvas,0,0);
+ctx.filter="none";
+
+}
+
+function sketchEffect(){
+
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const d=imageData.data;
+
+for(let i=0;i<d.length;i+=4){
+
+const gray=(d[i]+d[i+1]+d[i+2])/3;
+
+d[i]=gray;
+d[i+1]=gray;
+d[i+2]=gray;
+
+}
+
+ctx.putImageData(imageData,0,0);
+
+}
+
+function saveProject(){
+
+localStorage.setItem("aiImage",canvas.toDataURL());
+
+alert("Project saved");
+
+}
+
+function loadProject(){
+
+const data=localStorage.getItem("aiImage");
+
+if(!data) return;
+
+img.onload=function(){
+
+canvas.width=img.width;
+canvas.height=img.height;
 
 ctx.drawImage(img,0,0);
 
 }
 
-brightness.oninput=drawImage;
-contrast.oninput=drawImage;
-saturation.oninput=drawImage;
-
-function setFilter(filter){
-
-currentFilter=filter;
-drawImage();
+img.src=data;
 
 }
 
-function setBrush(){
-
-tool="brush";
-
-}
-
-function setEraser(){
-
-tool="eraser";
-
-}
-
-canvas.addEventListener("mousedown",()=>{
-
-drawing=true;
-
-});
-
-canvas.addEventListener("mouseup",()=>{
-
-drawing=false;
-ctx.beginPath();
-
-});
-
-canvas.addEventListener("mousemove",(e)=>{
-
-if(!drawing) return;
-
-ctx.lineWidth=document.getElementById("brushSize").value;
-ctx.lineCap="round";
-
-if(tool==="brush"){
-ctx.strokeStyle=document.getElementById("brushColor").value;
-}else{
-ctx.strokeStyle="white";
-}
-
-ctx.lineTo(e.offsetX,e.offsetY);
-ctx.stroke();
-ctx.beginPath();
-ctx.moveTo(e.offsetX,e.offsetY);
-
-});
-
-function addText(){
-
-const text=document.getElementById("textInput").value;
-const size=document.getElementById("textSize").value;
-
-ctx.font=size+"px Arial";
-ctx.fillStyle="white";
-ctx.fillText(text,50,80);
-
-}
-
-function rotate(deg){
-
-const temp=document.createElement("canvas");
-const tctx=temp.getContext("2d");
-
-temp.width=canvas.height;
-temp.height=canvas.width;
-
-tctx.translate(temp.width/2,temp.height/2);
-tctx.rotate(deg*Math.PI/180);
-
-tctx.drawImage(canvas,-canvas.width/2,-canvas.height/2);
-
-canvas.width=temp.width;
-canvas.height=temp.height;
-
-ctx.drawImage(temp,0,0);
-
-}
-
-function zoom(z){
-
-ctx.scale(z,z);
-ctx.drawImage(canvas,0,0);
-
-}
-
-function resizeImage(w,h){
-
-const temp=document.createElement("canvas");
-const tctx=temp.getContext("2d");
-
-temp.width=w;
-temp.height=h;
-
-tctx.drawImage(canvas,0,0,w,h);
-
-canvas.width=w;
-canvas.height=h;
-
-ctx.drawImage(temp,0,0);
-
-}
-
-function autoEnhance(){
-
-brightness.value=120;
-contrast.value=130;
-saturation.value=120;
-
-drawImage();
-
-}
-
-function downloadImage(){
+function download(){
 
 const link=document.createElement("a");
 
-link.download="edited.png";
+link.download="ai-image.png";
 link.href=canvas.toDataURL();
 
 link.click();
