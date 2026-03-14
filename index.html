@@ -1,31 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Tool</title>
+    <title>Image Tool Pro</title>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        canvas { border: 1px solid black; margin-top: 10px; }
+    </style>
 </head>
 <body>
 
-    <h2>Image Tool 🖼️</h2>
+<h2>Image Tool Pro 🖼️🔥</h2>
 
-    <input type="file" accept="image/*" id="upload">
-    <br><br>
-    <img id="preview" width="300">
+<input type="file" accept="image/*" id="upload"><br><br>
 
-    <script>
-        const upload = document.getElementById('upload');
-        const preview = document.getElementById('preview');
+<label>Resize Width:</label>
+<input type="number" id="width" placeholder="Auto">
+<br><br>
 
-        upload.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function() {
-                    preview.src = reader.result;
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+<button onclick="applyFilter('none')">Normal</button>
+<button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+<button onclick="applyFilter('blur(5px)')">Blur</button>
+<button onclick="applyFilter('brightness(150%)')">Bright</button>
+
+<br><br>
+
+<button onclick="downloadImage()">Download 📥</button>
+
+<br>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const upload = document.getElementById('upload');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let img = new Image();
+
+upload.addEventListener('change', function() {
+    const file = this.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        img.onload = function() {
+            resizeImage();
+        }
+        img.src = e.target.result;
+    }
+
+    reader.readAsDataURL(file);
+});
+
+function resizeImage() {
+    let widthInput = document.getElementById('width').value;
+
+    let newWidth = widthInput ? widthInput : img.width;
+    let ratio = newWidth / img.width;
+    let newHeight = img.height * ratio;
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+}
+
+function applyFilter(filter) {
+    canvas.style.filter = filter;
+}
+
+function downloadImage() {
+    const link = document.createElement('a');
+    link.download = 'edited-image.png';
+    link.href = canvas.toDataURL();
+    link.click();
+}
+</script>
 
 </body>
 </html>
