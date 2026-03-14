@@ -3,211 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Tool Level 7</title>
+<title>Super Image Studio</title>
 
 <style>
 body{
-  margin:0;
-  font-family:Arial;
-  background:#0b1220;
-  color:white;
-  text-align:center;
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
 }
 
 .container{
-  background:#111a2e;
-  padding:20px;
-  border-radius:15px;
-  max-width:950px;
-  margin:20px auto;
+padding:20px;
+max-width:1100px;
+margin:auto;
 }
 
 canvas{
-  max-width:100%;
-  margin-top:15px;
-  border-radius:10px;
-  background:white;
+max-width:100%;
+background:white;
+margin-top:20px;
+border-radius:10px;
 }
 
 button{
-  margin:5px;
-  padding:10px 14px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
+padding:8px 12px;
+margin:4px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+background:#1e293b;
+color:white;
 }
 
-.primary{ background:#00c6ff; color:white; }
-.secondary{ background:#ff9800; color:white; }
-.danger{ background:#e53935; color:white; }
+button:hover{
+background:#00c6ff;
+}
 
-input{
-  padding:6px;
-  margin:4px;
-  border-radius:6px;
-  border:none;
+.effects{
+margin-top:20px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🚀 Image Tool Level 7</h2>
-
 <div class="container">
 
+<h2>🚀 Super Image Studio Level 11</h2>
+
 <input type="file" id="upload" accept="image/*">
-
-<br><br>
-
-🎚 Brightness
-<input type="range" id="brightness" min="0" max="200" value="100">
-
-🌫 Blur
-<input type="range" id="blur" min="0" max="10" value="0">
-
-<br><br>
-
-📐 Width:
-<input type="number" id="newWidth" placeholder="1000">
-
-📐 Height:
-<input type="number" id="newHeight" placeholder="1000">
-
-<br><br>
-
-<label>
-<input type="checkbox" id="lockRatio" checked>
-🔒 Lock Ratio
-</label>
-
-<br><br>
-
-<button class="primary" onclick="applyResize()">🖼 Apply Size</button>
-<button class="secondary" onclick="undo()">↩ Undo</button>
-<button class="secondary" onclick="redo()">↪ Redo</button>
-<button class="danger" onclick="resetImage()">🔄 Reset</button>
-<button class="primary" onclick="downloadImage()">📥 Download</button>
 
 <br>
 
 <canvas id="canvas"></canvas>
 
+<div class="effects">
+
+<h3>🎨 Effects</h3>
+
+<button onclick="applyFilter('none')">Normal</button>
+<button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+<button onclick="applyFilter('sepia(100%)')">Sepia</button>
+<button onclick="applyFilter('contrast(200%)')">High Contrast</button>
+<button onclick="applyFilter('brightness(140%)')">Bright</button>
+<button onclick="applyFilter('brightness(60%)')">Dark</button>
+<button onclick="applyFilter('blur(3px)')">Blur</button>
+
+<button onclick="applyFilter('sepia(40%) contrast(120%) brightness(90%)')">Vintage</button>
+
+<button onclick="applyFilter('hue-rotate(180deg)')">Cool Tone</button>
+
+<button onclick="applyFilter('hue-rotate(330deg) saturate(140%)')">Warm Tone</button>
+
+<button onclick="applyFilter('contrast(150%) brightness(110%) saturate(120%)')">Cinematic</button>
+
+<button onclick="sharpenImage()">Sharpen</button>
+
+</div>
+
+<br>
+
+<button onclick="downloadImage()">📥 Download</button>
+
 </div>
 
 <script>
+
 const upload = document.getElementById("upload");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const brightness = document.getElementById("brightness");
-const blur = document.getElementById("blur");
-const lockRatio = document.getElementById("lockRatio");
-
 let img = new Image();
-let originalImage = null;
-let history = [];
-let redoStack = [];
-let aspectRatio = 1;
-
-function saveState(){
-  history.push(canvas.toDataURL());
-  redoStack = [];
-}
 
 upload.addEventListener("change", function(){
-  const file = this.files[0];
-  if(!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function(e){
-    img.onload = function(){
-      canvas.width = img.width;
-      canvas.height = img.height;
-      aspectRatio = img.width / img.height;
-      originalImage = e.target.result;
-      drawImage();
-      saveState();
-    }
-    img.src = e.target.result;
-  }
-  reader.readAsDataURL(file);
+const file = this.files[0];
+if(!file) return;
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+img.onload = function(){
+
+canvas.width = img.width;
+canvas.height = img.height;
+
+ctx.drawImage(img,0,0);
+
+}
+
+img.src = e.target.result;
+
+}
+
+reader.readAsDataURL(file);
+
 });
 
-function drawImage(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.filter = `brightness(${brightness.value}%) blur(${blur.value}px)`;
-  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+function applyFilter(filter){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.filter = filter;
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
 }
 
-brightness.oninput = drawImage;
-blur.oninput = drawImage;
+function sharpenImage(){
 
-function applyResize(){
-  let width = parseInt(document.getElementById("newWidth").value);
-  let height = parseInt(document.getElementById("newHeight").value);
+const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+const data = imageData.data;
 
-  if(!width && !height){
-    alert("Masukkan ukuran!");
-    return;
-  }
+for(let i=0;i<data.length;i+=4){
 
-  if(lockRatio.checked){
-    if(width && !height){
-      height = width / aspectRatio;
-    } else if(height && !width){
-      width = height * aspectRatio;
-    }
-  }
+data[i] = data[i]*1.15;
+data[i+1] = data[i+1]*1.15;
+data[i+2] = data[i+2]*1.15;
 
-  canvas.width = width;
-  canvas.height = height;
-
-  drawImage();
-  saveState();
 }
 
-function undo(){
-  if(history.length > 1){
-    redoStack.push(history.pop());
-    let imgData = new Image();
-    imgData.onload = function(){
-      canvas.width = imgData.width;
-      canvas.height = imgData.height;
-      ctx.drawImage(imgData,0,0);
-    }
-    imgData.src = history[history.length-1];
-  }
-}
+ctx.putImageData(imageData,0,0);
 
-function redo(){
-  if(redoStack.length > 0){
-    let data = redoStack.pop();
-    history.push(data);
-    let imgData = new Image();
-    imgData.onload = function(){
-      canvas.width = imgData.width;
-      canvas.height = imgData.height;
-      ctx.drawImage(imgData,0,0);
-    }
-    imgData.src = data;
-  }
-}
-
-function resetImage(){
-  if(!originalImage) return;
-  img.src = originalImage;
-  history = [];
-  redoStack = [];
 }
 
 function downloadImage(){
-  const link = document.createElement("a");
-  link.download = "image-level7.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+
+const link = document.createElement("a");
+
+link.download = "edited-image.png";
+
+link.href = canvas.toDataURL();
+
+link.click();
+
 }
+
 </script>
 
 </body>
