@@ -1,5 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
+<br><br>
+
+📐 Width:
+<input type="number" id="newWidth" placeholder="1000">
+
+📐 Height:
+<input type="number" id="newHeight" placeholder="1000">
+
+<br>
+<button onclick="resizeCustom()">🖼 Resize Custom</button>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -95,6 +105,28 @@ button:hover{
 </div>
 
 <script>
+function resizeCustom(){
+  const width = parseInt(document.getElementById("newWidth").value);
+  const height = parseInt(document.getElementById("newHeight").value);
+
+  if(!width || !height){
+    alert("Masukkan width dan height dulu!");
+    return;
+  }
+
+  const temp = document.createElement("canvas");
+  const tempCtx = temp.getContext("2d");
+
+  temp.width = width;
+  temp.height = height;
+
+  tempCtx.drawImage(canvas,0,0,width,height);
+
+  canvas.width = width;
+  canvas.height = height;
+
+  ctx.drawImage(temp,0,0);
+}
 const upload = document.getElementById("upload");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
