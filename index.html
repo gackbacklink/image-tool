@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super Image Studio</title>
+<title>Ultra Image Studio</title>
 
 <style>
 body{
@@ -15,16 +15,16 @@ text-align:center;
 }
 
 .container{
-padding:20px;
 max-width:1100px;
 margin:auto;
+padding:20px;
 }
 
 canvas{
 max-width:100%;
 background:white;
-margin-top:20px;
 border-radius:10px;
+margin-top:15px;
 }
 
 button{
@@ -33,17 +33,24 @@ margin:4px;
 border:none;
 border-radius:8px;
 cursor:pointer;
-font-weight:bold;
 background:#1e293b;
 color:white;
+font-weight:bold;
 }
 
 button:hover{
 background:#00c6ff;
 }
 
-.effects{
-margin-top:20px;
+.slider{
+width:200px;
+}
+
+.drop{
+border:2px dashed #555;
+padding:20px;
+margin-bottom:10px;
+border-radius:10px;
 }
 </style>
 </head>
@@ -52,39 +59,53 @@ margin-top:20px;
 
 <div class="container">
 
-<h2>🚀 Super Image Studio Level 11</h2>
+<h2>🚀 Ultra Image Studio Level 12</h2>
 
-<input type="file" id="upload" accept="image/*">
+<div class="drop" id="drop">
+Drag & Drop Image Here
+</div>
+
+<input type="file" id="upload">
 
 <br>
 
 <canvas id="canvas"></canvas>
 
-<div class="effects">
+<h3>🎚 Adjust</h3>
 
-<h3>🎨 Effects</h3>
+Brightness  
+<input class="slider" id="brightness" type="range" min="50" max="200" value="100">
 
-<button onclick="applyFilter('none')">Normal</button>
-<button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
-<button onclick="applyFilter('sepia(100%)')">Sepia</button>
-<button onclick="applyFilter('contrast(200%)')">High Contrast</button>
-<button onclick="applyFilter('brightness(140%)')">Bright</button>
-<button onclick="applyFilter('brightness(60%)')">Dark</button>
-<button onclick="applyFilter('blur(3px)')">Blur</button>
+Contrast  
+<input class="slider" id="contrast" type="range" min="50" max="200" value="100">
 
-<button onclick="applyFilter('sepia(40%) contrast(120%) brightness(90%)')">Vintage</button>
+Saturation  
+<input class="slider" id="saturation" type="range" min="50" max="200" value="100">
 
-<button onclick="applyFilter('hue-rotate(180deg)')">Cool Tone</button>
+<br><br>
 
-<button onclick="applyFilter('hue-rotate(330deg) saturate(140%)')">Warm Tone</button>
+<h3>🎨 Filters</h3>
 
-<button onclick="applyFilter('contrast(150%) brightness(110%) saturate(120%)')">Cinematic</button>
+<button onclick="setFilter('none')">Normal</button>
+<button onclick="setFilter('grayscale(100%)')">Grayscale</button>
+<button onclick="setFilter('sepia(100%)')">Sepia</button>
+<button onclick="setFilter('blur(3px)')">Blur</button>
+<button onclick="setFilter('invert(100%)')">Invert</button>
+<button onclick="setFilter('hue-rotate(180deg)')">Cool</button>
+<button onclick="setFilter('hue-rotate(320deg)')">Warm</button>
+<button onclick="setFilter('contrast(180%) brightness(120%)')">Cinematic</button>
 
-<button onclick="sharpenImage()">Sharpen</button>
+<br><br>
 
-</div>
+<h3>✨ Tools</h3>
 
-<br>
+<button onclick="autoEnhance()">Auto Enhance</button>
+
+<button onclick="resizeImage(1080,1080)">Instagram</button>
+<button onclick="resizeImage(1920,1080)">YouTube</button>
+<button onclick="resizeImage(1000,1000)">Square</button>
+
+<br><br>
 
 <button onclick="downloadImage()">📥 Download</button>
 
@@ -96,9 +117,16 @@ const upload = document.getElementById("upload");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let img = new Image();
+const brightness = document.getElementById("brightness");
+const contrast = document.getElementById("contrast");
+const saturation = document.getElementById("saturation");
 
-upload.addEventListener("change", function(){
+let img = new Image();
+let currentFilter = "none";
+
+upload.addEventListener("change", loadImage);
+
+function loadImage(){
 
 const file = this.files[0];
 if(!file) return;
@@ -112,7 +140,7 @@ img.onload = function(){
 canvas.width = img.width;
 canvas.height = img.height;
 
-ctx.drawImage(img,0,0);
+drawImage();
 
 }
 
@@ -122,32 +150,59 @@ img.src = e.target.result;
 
 reader.readAsDataURL(file);
 
-});
+}
 
-function applyFilter(filter){
+function drawImage(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.filter = filter;
+ctx.filter = `
+brightness(${brightness.value}%)
+contrast(${contrast.value}%)
+saturate(${saturation.value}%)
+${currentFilter}
+`;
 
 ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
 }
 
-function sharpenImage(){
+brightness.oninput = drawImage;
+contrast.oninput = drawImage;
+saturation.oninput = drawImage;
 
-const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-const data = imageData.data;
+function setFilter(filter){
 
-for(let i=0;i<data.length;i+=4){
+currentFilter = filter;
 
-data[i] = data[i]*1.15;
-data[i+1] = data[i+1]*1.15;
-data[i+2] = data[i+2]*1.15;
+drawImage();
 
 }
 
-ctx.putImageData(imageData,0,0);
+function autoEnhance(){
+
+brightness.value = 120;
+contrast.value = 130;
+saturation.value = 120;
+
+drawImage();
+
+}
+
+function resizeImage(w,h){
+
+const temp = document.createElement("canvas");
+const tctx = temp.getContext("2d");
+
+temp.width = w;
+temp.height = h;
+
+tctx.drawImage(canvas,0,0,w,h);
+
+canvas.width = w;
+canvas.height = h;
+
+ctx.drawImage(temp,0,0);
 
 }
 
@@ -155,13 +210,48 @@ function downloadImage(){
 
 const link = document.createElement("a");
 
-link.download = "edited-image.png";
+link.download = "image-edit.png";
 
 link.href = canvas.toDataURL();
 
 link.click();
 
 }
+
+const drop = document.getElementById("drop");
+
+drop.addEventListener("dragover",(e)=>{
+
+e.preventDefault();
+
+});
+
+drop.addEventListener("drop",(e)=>{
+
+e.preventDefault();
+
+const file = e.dataTransfer.files[0];
+
+const reader = new FileReader();
+
+reader.onload = function(ev){
+
+img.onload = function(){
+
+canvas.width = img.width;
+canvas.height = img.height;
+
+drawImage();
+
+}
+
+img.src = ev.target.result;
+
+}
+
+reader.readAsDataURL(file);
+
+});
 
 </script>
 
